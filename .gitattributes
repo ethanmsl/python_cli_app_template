@@ -1,7 +1,0 @@
-# See 'GitHub Linguist Overrides' for more information
-# https://github.com/github/linguist/blob/master/docs/overrides.md
-
-# prevent 'assets' content from being counted in repo language stats
-# , but show changes to it in diffs
-assets/** linguist-vendored
-
