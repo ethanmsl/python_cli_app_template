@@ -21,9 +21,12 @@ from . import __name__ as APP_NAME
 # generage CLI app object
 app = typer.Typer(rich_markup_mode="rich", add_completion=False)
 
+##################################################################################
+# Version Call Boilerplate
+##################################################################################
+
 # get version from pyproject.toml
 __version__ = metadata.version(__package__)
-
 
 def version_callback(version: bool):
     """
