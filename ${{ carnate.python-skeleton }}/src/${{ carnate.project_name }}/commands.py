@@ -14,6 +14,9 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, track
 from rich.prompt import Prompt
 
 from . import __name__ as APP_NAME
+# ^ uses parent's `__name__` to dynamically get the name of the app
+# note: this may be separate from the name used to call the app via cli
+# (e.g. `ripgrep` is an app, but it is called with `rg`)
 
 # generage CLI app object
 app = typer.Typer(rich_markup_mode="rich", add_completion=False)
@@ -27,7 +30,7 @@ def version_callback(version: bool):
     Print app version and exit
     """
     if version:
-        rprint(f"${{ carnate.project_name }} ('${{ carnate.cli_app_name }}') Version: {__version__}")
+        rprint(f"{APP_NAME} ('${{ carnate.cli_app_name }}') Version: {__version__}")
         raise typer.Exit()
 
 
