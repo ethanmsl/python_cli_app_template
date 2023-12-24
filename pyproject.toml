@@ -2,9 +2,11 @@
 name = "${{ carnate.project_name }}"
 version = "0.1.0"
 description = ""
-authors = ["${{ carnate.author_name }} <${{ carnate.no_reply_email }}@users.noreply.github.com>"]
+authors = [
+        "${{ carnate.author_name }} <${{ carnate.no_reply_email }}@users.noreply.github.com>",
+]
 readme = "README.md"
-packages = [{include = "${{ carnate.project_name }}", from = "src"}]
+packages = [{ include = "${{ carnate.project_name }}", from = "src" }]
 
 
 # declares name of CLI app and where the insertion point is
@@ -13,63 +15,108 @@ ${{ carnate.cli_app_name }} = "${{ carnate.project_name }}.commands:app"
 
 
 [tool.poetry.dependencies]
+# -- Python Version(s) --
 python = "^3.11"
-typer = {extras = ["all"], version = "^0.7.0"}
+# CLI Framework
+typer = { extras = ["all"], version = "^0.7.0" }
+# Env Load
+python-dotenv = "^1.0.0"
+# API Calls
+httpx = "^0.25.2"
+# Time
+arrow = "^1.3.0"
+# Logging
+structlog = "^23.2.0"
+# Runtime Type-Coercion
+pydantic = { version = "^2.5.2", extras = ["email,dotenv"] }
+# Data Frames
+polars = { version = "^0.19.19", extras = ["all"] }
+# # Math
+# numpy = "^1.26.2"
+# scipy = "^1.11.4"
+# sympy = "^1.12"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.12.0"
-isort = "^5.12.0"
-pdoc = "^12.3.1"
-pylint = "^2.15.10"
-pyright = "^1.1.291"
-pytest = "^7.2.1"
-pytest-cov = "^4.0.0"
+# Documenting
+pdoc = "^14.1.0"
+# Format, Lint
+ruff = "^0.0.291"
+ruff-lsp = "^0.0.39"
+# Security Lint
+bandit = "^1.7.5"
+# Type
+pyright = "^1.1.329"
+# Test
+pytest = "^7.4.2"
+pytest-cov = "^4.1.0"
+hypothesis = "^6.91.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 
-[tool.isort]
-# compatibility with Black formatter
-profile = "black"
-
-
-# # example repo-wide pylint disablement section
-# [tool.pylint]
-# disable = [
-#     "C0303",  # trailing-whitespace
-#     "R0903",  # too-few-public-methods
-# ]
-
-[tool.pylint.format]
-# line length to match Black formatter
-max-line-length = "88"
-
-
 [tool.pyright]
 include = ["src"]
-exclude = [".venv",
-    "src/experimental",
-    "src/typestubs",
-  "**/__pycache__"
-]
+exclude = [".venv", "src/experimental", "src/typestubs", "**/__pycache__"]
 # utilizing the fact that we've set Poetry `virtualenv.in-project` to true
 venvPath = "."
 venv = ".venv"
 
-typeCheckingMode = "basic"  # "off", "basic", "strict"
+typeCheckingMode = "basic"    # "off", "basic", "strict"
 reportMissingImports = true
 reportMissingTypeStubs = true
 
-executionEnvironments = [
-  { root = "src" }
-]
+executionEnvironments = [{ root = "src" }]
 
 
 [tool.pytest.ini_options]
 # adds the following paths to pythonpath, specified relative to root dir
-pythonpath = [
-    "src",
+addopts = "--doctest-modules" # run doctests
+pythonpath = ["src"]
+
+
+[tool.bandit]
+exclude_dirs = ["tests", "src/experimental", "src/typestubs", ".venv"]
+
+
+[tool.ruff]
+# Allow imports relative to the "src" and "test" directories.
+src = ["src", "tests"]
+
+# warn, but recommend restructuring for unused `__init__.py` module imports
+ignore-init-module-imports = true
+
+select = ["ALL"]
+ignore = [
+        "D203",   # One blank line before class -- conflicts with "D211"
+        "D213",   # Multiline docstrings start on second line -- conflicts with "D212"
+        "COM812", # Requests trailing commas -- can conflict with auto-formatting
+        "ISC001", # Concatination of single line strings -- can conflict with auto-formatting.
+]
+
+[tool.ruff.extend-per-file-ignores]
+# ignore these lints in a file that will be specifying CLI args (via Typer decorators)
+"commands.py" = [
+        "FBT001", # No `bool` params -- used to specify CLI arguments with Typer module
+        "FBT002", # No `bool` param defaults -- CLI argument values in Typer module
+        "UP007",  # No `Option[..]` Type-syntax -- used by Typer module
+]
+# ignore these lints in a file that will be testing CLI arg defining functions
+"test_commands.py" = [
+        "FBT003", # No `bool` in func calls -- functions being tested represent CLI args
+]
+# ignore these lints in all test files
+"test_*.py" = [
+        "S101",    # Use of `assert` -- intended in tests files
+        "PLR2004", # Magic Value used in comparison -- impractical rule in test files
+]
+# ignore these lints in a file conversion to a Jupyter Notebook ("jupytext file")
+"*.ju.py" = [
+        "D100",   # "Missing Docstring in Public Module" -- not use of ju.py
+        "E402",   # "module level import not at top of file"
+        "ERA001", # "commented out code" - this can be confused by jupytext syntax
+        "I001",   # "Import Block Unformated" -- imports are placed differently in jupyter files
+        "T201",   # "print found"
 ]
