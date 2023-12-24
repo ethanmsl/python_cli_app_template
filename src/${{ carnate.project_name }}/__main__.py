@@ -1,5 +1,5 @@
-"""
-Entry point for the program.
+"""Entry point for the program.
+
 (acts similarly to `if __name__ == '__main__': ...` in single script python modules.)
 This also contains the top most logic for the program.
 

@@ -1,5 +1,6 @@
-"""
-*De facto* `main`, holding the key functions acting as entry points
+"""*De facto* `main`.
+
+Holding the key functions acting as entry points
 to any other code and acting as the bridge to the user via
 the typer framework and decorators.
 """
@@ -18,7 +19,7 @@ from . import __name__ as APP_NAME
 # note: this may be separate from the name used to call the app via cli
 # (e.g. `ripgrep` is an app, but it is called with `rg`)
 
-# generage CLI app object
+# generate CLI app object
 app = typer.Typer(rich_markup_mode="rich", add_completion=False)
 
 ##################################################################################
@@ -29,12 +30,10 @@ app = typer.Typer(rich_markup_mode="rich", add_completion=False)
 __version__ = metadata.version(__package__)
 
 def version_callback(version: bool):
-    """
-    Print app version and exit
-    """
+    """Print app version and exit."""
     if version:
         rprint(f"{APP_NAME} ('${{ carnate.cli_app_name }}') Version: {__version__}")
-        raise typer.Exit()
+        raise typer.Exit(code=0)
 
 
 @app.callback(help="[bold]${{ carnate.project_name }}[/bold] CLI App for [green]PagerDuty[/green]")
@@ -45,10 +44,11 @@ def app_options(
         help="Show version of this app",
         callback=version_callback,
         is_eager=True,
-    )
+    ),
 ):
-    """
-    This callback is called by the **base app** itself.
+    """Make a callback to get version.
+
+    **Base App** calls Callback.
     Sub-callbacks are used by the options to perform actions.
     The eager sub-callback allows us to circumvent typer's expectation that a regular
     command is still comming.
@@ -91,9 +91,8 @@ def pword(
     ),
     # NOTE: we would NOT want this as it allows explicit flag calling and regular
     #       code inputing
-):
-    """Example use of \"hide_input\" true."""
-
+) -> None:
+    """Request input that needs to be hidden."""
     rprint(
         f"Hello [blue]{name}[/blue]. Doing something very secure :lock: with password."
     )
@@ -101,7 +100,7 @@ def pword(
 
 @app.command(rich_help_panel="Prompted")
 def adding_tags() -> None:
-    """Example of using rich's prompt to add tags to a ticket"""
+    """Use Rich's prompt to add tags to a ticket."""
     tags = []
     while True:
         tag = Prompt.ask("Enter a tag, or [bold red]q[/bold red] to quit")
@@ -118,8 +117,10 @@ def adding_tags() -> None:
 
 @app.command(rich_help_panel="Visual")
 def spin(seconds: int = typer.Argument(5, min=1, max=36)) -> None:
-    """Spinners for the unknowably long and asynchronous."""
+    """Generate Spinners.
 
+    For the unknowably long and asynchronous.
+    """
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}", justify="right"),
@@ -134,12 +135,10 @@ def spin(seconds: int = typer.Argument(5, min=1, max=36)) -> None:
 
 @app.command(rich_help_panel="Visual")
 def progbar(
-    seconds: int = typer.Argument(5, min=1, max=16), plain_bar: bool = False
+    seconds: int = typer.Argument(5, min=1, max=16),
+    plain_bar: bool = False,
 ) -> None:
-    """
-    A progress bar set to your task.
-    """
-
+    """Generate progress bar in terminal."""
     if not plain_bar:
         total_so_far: int = 0
         for _ in track(range(seconds), description="Sleeping..."):
@@ -165,6 +164,6 @@ def numeric_intake(
     x_int: int = typer.Argument(..., min=0, max=2),
     y_int: int = typer.Argument(..., min=-1, max=1),
 ) -> int:
-    """Has `min` and `max` restrictions on numeric arguments"""
+    """Take in `min` and `max`, with restrictions."""
     rprint(f"[blue]X[/blue]: {x_int}, [green]Y[/green]: {y_int}")
     return x_int + y_int
