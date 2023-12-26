@@ -20,7 +20,6 @@ init:
         poetry check
         poetry install
         poetry build
-        poetry shellpoetry add --group=user polars jupyterlab notebook jupytext matplotlib seaborn numpy scipy sympy ipywidgets  
 
 # Open Jupyter Lab in a web browser.
 jupyter: _notify_if_not_root
