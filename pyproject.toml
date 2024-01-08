@@ -30,7 +30,7 @@ structlog = "^23.2.0"
 # Runtime Type-Coercion
 pydantic = { version = "^2.5.2", extras = ["email,dotenv"] }
 # Data Frames
-polars = { version = "^0.19.19", extras = ["all"] }
+polars = { version = "^0.20.3", extras = ["all"] }
 # # Math
 numpy = "^1.26.2"
 # scipy = "^1.11.4"
