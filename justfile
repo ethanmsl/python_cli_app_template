@@ -14,12 +14,13 @@ _default:
 
 # initialize project
 init:
-        which  just  # in case you'e reading ;)
+        which just  # in case you're reading ;)
         which pipx
         which poetry
         poetry check
         poetry install
         poetry build
+        cp data/template.env .env
 
 # Open Jupyter Lab in a web browser.
 jupyter: _notify_if_not_root
