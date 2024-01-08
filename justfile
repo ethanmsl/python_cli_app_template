@@ -10,7 +10,7 @@ alias venv := poet-shell
 
 # Default, lists commands.
 _default:
-        @just --list --unsorted
+        @ just --list --unsorted
 
 # initialize project
 init:
@@ -23,17 +23,17 @@ init:
 
 # Open Jupyter Lab in a web browser.
 jupyter: _notify_if_not_root
-        @echo "Opening Jupyter Lab in a Web Browser\n"
+        @ echo "Opening Jupyter Lab in a Web Browser\n"
         poetry run jupyter lab
 
 # Enter Poetry Virtual Environment.
 poet-shell: _notify_if_not_root
-        @echo "Entering Shell running Poetry Virtual Environment\n"
+        @ echo "Entering Shell running Poetry Virtual Environment\n"
         poetry shell
 
 # Run python file in Poetry venv. (add -m for a module)
 py +INP: _notify_if_not_root
-        @echo "Running {{INP}} via Python...\n"
+        @ echo "Running {{INP}} via Python...\n"
         poetry run python3 {{INP}}
 
 # TODO: make this run a script in `.justscripts` See [here](https://just.systems/man/en/chapter_42.html?highlight=bash%20script#safer-bash-shebang-recipes)
@@ -44,7 +44,7 @@ hook:
 # Sync all files in `notebooks/` with Jupytext.
 jsync-all: _notify_if_not_root
         #!/bin/bash
-        echo "Syncing Jupytext versions of all '.ipynb' notebooks...\n"
+        @ echo "Syncing Jupytext versions of all '.ipynb' notebooks...\n"
         set -xeuo pipefail # euo pipefail: fail flags; x: print commands
         for notebook in notebooks/*.ipynb; do
                 poetry run jupytext --set-formats .ipynb,.ju.py:percent "$notebook" # jupytext  % format
@@ -54,29 +54,32 @@ jsync-all: _notify_if_not_root
 
 # Sync specified files in `notebooks/` with Jupytext.
 jsync +NOTEBOOK: _notify_if_not_root
-        @echo "Creating/Syncing Jupytext versions of the following '.ipynb' notebooks {{NOTEBOOK}}...\n"
+        @ echo "Creating/Syncing Jupytext versions of the following '.ipynb' notebooks {{NOTEBOOK}}...\n"
         poetry run jupytext --set-formats .ipynb,.ju.py:percent notebooks/{{NOTEBOOK}}.ipynb # jupytext  % format
         poetry run jupytext --sync notebooks/{{NOTEBOOK}}.ipynb # synch .ju.py & .ipynb files
 
 # Update Poetry Dependencies.
 update:
-        @echo "Updating Poetry Virtual Environment...\n"
+        @ echo "Updating Poetry Virtual Environment...\n"
+        @ echo "Note: this will not update versions past the line of what is api-compatible with the version declare in the PyProject.TOML"
+        @ echo "e.g. Pydantic v2.x.y will not update past v2, and Poalrs v0.20.z will not update past v0.20; unless PyProject.TOML versions are altered."
+        @ echo "This preserves nominal api-compatibility."
         poetry update
         poetry check
 
 # Add User dependencies via Poetry.
 deps-add +USER_DEPS:
-        @echo "Adding the following user dependencies via Poetry: {{USER_DEPS}} ...\n"
+        @ echo "Adding the following user dependencies via Poetry: {{USER_DEPS}} ...\n"
         poetry add {{USER_DEPS}}
 
 # Add Developer dependencies via Poetry. (e.g. linters, testers)
 deps-add-dev +DEV_DEPS:
-        @echo "Adding the following developer dependencies via Poetry: {{DEV_DEPS}} ...\n"
+        @ echo "Adding the following developer dependencies via Poetry: {{DEV_DEPS}} ...\n"
         poetry add --group=dev {{DEV_DEPS}}
 
 # Remove dependencies via Poetry.
 deps-remove +DEPS:
-        @echo "Removing the following developer dependencies via Poetry: {{DEPS}} ...\n"
+        @ echo "Removing the following developer dependencies via Poetry: {{DEPS}} ...\n"
         poetry remove {{DEPS}}
 
 # Push Jupyter file changes after jupytext syncing.
@@ -90,7 +93,7 @@ push-jup: jsync-all
 
 # Auto-Gen Files: Add, Commit, and Push all changes.
 push-chore: _notify_if_not_root
-        @echo "Auto-Gen File Updates: Committing and Pushing all changes to requirments*.txt & dev_docs/*: {{local_root}}...\n"
+        @ echo "Auto-Gen File Updates: Committing and Pushing all changes to requirments*.txt & dev_docs/*: {{local_root}}...\n"
         git fetch
         git restore --staged .
         git add requirements* dev_docs/*
@@ -99,7 +102,7 @@ push-chore: _notify_if_not_root
 
 # JustFile: Add, Commit, and Push all changes.
 push-justfile: _notify_if_not_root
-        @echo "JustFile Updates: Committing and Pushing all changes to justfile under root: {{local_root}}...\n"
+        @ echo "JustFile Updates: Committing and Pushing all changes to justfile under root: {{local_root}}...\n"
         git fetch
         git restore --staged .
         git add justfile
@@ -109,22 +112,22 @@ push-justfile: _notify_if_not_root
 
 # Show dependency tree for project.
 show-tree:
-        @echo "Dependency tree for {{local_root}}\n"
+        @ echo "Dependency tree for {{local_root}}\n"
         poetry show --tree --verbose --verbose --verbose
 
 # Show flattened dependency tree for project. (Useful for piping.)
 show-list:
-        @echo "Dependency list (recursed) for {{local_root}}\n"
+        @ echo "Dependency list (recursed) for {{local_root}}\n"
         poetry show --verbose --verbose --verbose
 
 # Filtered dependency list results.
 show-filter REGEX:
-        @echo "Filtered, recursed dependency list for {{local_root}}\n"
+        @ echo "Filtered, recursed dependency list for {{local_root}}\n"
         poetry show --verbose --verbose --verbose | grep '{{REGEX}}'
 
 notify_text := "\n-----\nNOTE:\n    You are running this command in:\n"+invocd_from+"\n    But it will be run in:\n" +local_root+".\n-----\n"
 _notify_if_not_root:
-        @echo '{{ if invoc_is_root == 'true' { "" } else { notify_text } }}'
+        @ echo '{{ if invoc_is_root == 'true' { "" } else { notify_text } }}'
 
 
 ######################### Future Work / Explorations #########################
@@ -134,7 +137,7 @@ _notify_if_not_root:
 
 # Runs pre-commit hook.
 _hook: _notify_if_not_root
-        @echo "Running git hook from {{local_root}}...\n"
+        @ echo "Running git hook from {{local_root}}...\n"
         poetry run git hook run pre-commit
 
 # Setup Repo, Installing Dependencies and Readying venv.
@@ -162,19 +165,33 @@ _doc:
 sec-test:
         poetry run bandit -r notebooks/
 
-# TODO: add [confirm] attribute when released
 # Warning: Heavy, Opinionated command. Installs Poetry and configs venvs to be local.  Downloads pipx for install, via Homebrew.
 [macos]
+[confirm]
 get-poetry:
-        @echo "\n-----\nInstalling and Configuring Poetry. Utilizing Homebrew and PipX\n-----\n"
+        @ echo "\n-----\nInstalling and Configuring Poetry. Utilizing Homebrew and PipX\n-----\n"
         brew install pipx
-        @echo
+        @ echo
         pipx ensurepath
-        @echo
+        @ echo
         pipx install poetry
-        @echo
+        @ echo
         poetry config virtualenvs.in-project true
-        @echo
+        @ echo
         poetry config --list
-        @echo
+        @ echo
         poetry about
+
+# # WARN: doesn't work.  Spawns own shell.  So exit command never exits in the calling shell.
+# in_poet_shell := if env_var_or_default('POETRY_ACTIVE', 'false') == '1' { "true" } else { "false" }
+# alias exit := exit-poet-shell
+# # Exit Poetry venv, if currently in one.
+# exit-poet-shell:
+#         if {{in_poet_shell}}; then \
+#                 echo 'Exiting Poetry Shell (venv)'; \
+#                 exit; \
+#         else \
+#                 echo 'Environment variables do not indicate that we are currently in a Poetry Shell (venv).\n\
+#                 You may manually exit any shell with the "exit" command, if you wish!'; \
+#         fi
+
