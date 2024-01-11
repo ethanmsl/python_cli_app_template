@@ -5,7 +5,13 @@
 local_root := justfile_directory()
 invocd_from := invocation_directory()
 invoc_is_root := if invocd_from == local_root { "true" } else { "false" }
-
+## ANSI Color Codes for use with echo command
+GRN := '\033[0;32m' # Green
+BLU := '\033[0;34m' # Blue
+PRP := '\033[0;35m' # Purple
+BRN := '\033[0;33m' # Brown
+CYN := '\033[0;36m' # Cyan
+NC := '\033[0m'     # No Color
 
 # Default, lists commands.
 _default:
@@ -21,48 +27,27 @@ init:
         poetry build
         cp data/template.env .env
 
-# Open Jupyter Lab in a web browser. (`poetry run jupyter lab`)
-jupyter: _notify_if_not_root
+# Open notebook environment, Jupyter Lab, in a web browser.
+open: _notify_if_not_root
         @ echo "Opening Jupyter Lab in a Web Browser\n"
         poetry run jupyter lab
 
-# Enter Poetry Virtual Environment. (`poetry shell`)
-venv: _notify_if_not_root
-        @ echo "Entering Shell running Poetry Virtual Environment\n"
-        poetry shell
-
-# Run python file in Poetry venv. Add `-m ` for a module. (`poetry run python3`)
-py +INP: _notify_if_not_root
-        @ echo "Running {{INP}} via Python...\n"
-        poetry run python3 {{INP}}
-
-# Sync all files in `notebooks/` with Jupytext.
-jsync-all: _notify_if_not_root
-        #!/bin/bash
-        @ echo "Syncing Jupytext versions of all '.ipynb' notebooks...\n"
-        set -xeuo pipefail # euo pipefail: fail flags; x: print commands
-        for notebook in notebooks/*.ipynb; do
-                poetry run jupytext --set-formats .ipynb,.ju.py:percent "$notebook" # jupytext  % format
-                poetry run jupytext --sync "$notebook" # synch .ju.py & .ipynb files
-        done
-
-# Add User dependencies via Poetry.
-deps-add +USER_DEPS:
-        @ echo "Adding the following user dependencies via Poetry: {{USER_DEPS}} ...\n"
-        poetry add {{USER_DEPS}}
-
-# Add Developer dependencies via Poetry. (e.g. linters, testers)
-deps-add-dev +DEV_DEPS:
-        @ echo "Adding the following developer dependencies via Poetry: {{DEV_DEPS}} ...\n"
-        poetry add --group=dev {{DEV_DEPS}}
-
-# Remove dependencies via Poetry.
-deps-remove +DEPS:
-        @ echo "Removing the following developer dependencies via Poetry: {{DEPS}} ...\n"
-        poetry remove {{DEPS}}
+# List of common Poetry commands.
+poet: _notify_if_not_root
+        @ echo "{{GRN}}poetry {{CYN}}shell{{NC}}: enters virtual environment."
+        @ echo "{{GRN}}exit{{NC}}: exits a shell, e.g. the virtual environment shell the above command puts you in."
+        @ echo "{{GRN}}poetry {{CYN}}run{{NC}}: runs a command using the virtual environment (without switching the user's shell to it)."
+        @ echo
+        @ echo "{{GRN}}poetry {{CYN}}add {{PRP}}...{{NC}}: adds modules to the project."
+        @ echo "{{GRN}}poetry {{CYN}}add {{BRN}}--group=dev {{PRP}}...{{NC}}: adds modules to the project *as Developer Dependencies*"
+        @ echo "{{GRN}}poetry {{CYN}}remove {{PRP}}...{{NC}}: removes a dependency."
+        @ echo
+        @ echo "{{GRN}}poetry {{CYN}}update{{NC}}: updates all dependencies. NOTE: this will only update within semver limits set in pyproject.toml"
+        @ echo "{{GRN}}poetry {{CYN}}install{{NC}}: installs all dependencies."
+        @ echo "{{GRN}}poetry {{CYN}}build{{NC}}: builds tarball and wheel, for distribution."
 
 # Push Jupyter file changes after jupytext syncing.
-push-jup: jsync-all 
+push-nb: _jtxt
         @echo "Auto-Gen File Updates: Committing and Pushing all changes to requirments*.txt & dev_docs/*: {{local_root}}...\n"
         git fetch
         git restore --staged .
@@ -80,21 +65,52 @@ push-chore: _notify_if_not_root
         git push
 
 # Show dependency tree for project.
-show-tree:
+dep-tree:
         @ echo "Dependency tree for {{local_root}}\n"
         poetry show --tree --verbose --verbose --verbose
 
 # Filtered dependency list results.
-show-filter REGEX:
+dep-filter REGEX:
         @ echo "Filtered, recursed dependency list for {{local_root}}\n"
         poetry show --verbose --verbose --verbose | grep '{{REGEX}}'
+
+# Warning: Heavy, Opinionated command. Installs Poetry and configs venvs to be local.  Downloads pipx for install, via Homebrew.
+[macos]
+[confirm]
+get-poetry: && init
+        @ echo "\n-----\nInstalling and Configuring Poetry. Utilizing Homebrew and PipX\n-----\n"
+        brew install pipx
+        @ echo
+        pipx ensurepath
+        @ echo
+        pipx install poetry
+        @ echo
+        poetry config virtualenvs.in-project true
+        @ echo
+        poetry config --list
+        @ echo
+        poetry about
+
+
+######################### Clutter Help Docs #########################
 
 notify_text := "\n-----\nNOTE:\n    You are running this command in:\n"+invocd_from+"\n    But it will be run in:\n" +local_root+".\n-----\n"
 _notify_if_not_root:
         @ echo '{{ if invoc_is_root == 'true' { "" } else { notify_text } }}'
 
+# Sync all files in `notebooks/` with Jupytext.
+_jtxt: _notify_if_not_root
+        #!/bin/bash
+        @ echo "Syncing Jupytext versions of all '.ipynb' notebooks...\n"
+        set -xeuo pipefail # euo pipefail: fail flags; x: print commands
+        for notebook in notebooks/*.ipynb; do
+                poetry run jupytext --set-formats .ipynb,.ju.py:percent "$notebook" # jupytext  % format
+                poetry run jupytext --sync "$notebook" # synch .ju.py & .ipynb files
+        done
 
-######################### Clutter Help Docs #########################
+# Scan for security concerns.
+_sec-test:
+        poetry run bandit -r notebooks/
 
 # Sync specified files in `notebooks/` with Jupytext.
 _jsync +NOTEBOOK: _notify_if_not_root
@@ -124,6 +140,7 @@ _push-justfile: _notify_if_not_root
 _show-list:
         @ echo "Dependency list (recursed) for {{local_root}}\n"
         poetry show --verbose --verbose --verbose
+
 
 ######################### Future Work / Explorations #########################
 #
@@ -159,26 +176,30 @@ _type:
 _doc:
         poetry run pdoc notebooks/
 
-# Scan for security concerns.
-sec-test:
-        poetry run bandit -r notebooks/
+# Run python file in Poetry venv. Add `-m ` for a module. (`poetry run python3`)
+_py +INP: _notify_if_not_root
+        @ echo "Running {{INP}} via Python...\n"
+        poetry run python3 {{INP}}
 
-# Warning: Heavy, Opinionated command. Installs Poetry and configs venvs to be local.  Downloads pipx for install, via Homebrew.
-[macos]
-[confirm]
-get-poetry:
-        @ echo "\n-----\nInstalling and Configuring Poetry. Utilizing Homebrew and PipX\n-----\n"
-        brew install pipx
-        @ echo
-        pipx ensurepath
-        @ echo
-        pipx install poetry
-        @ echo
-        poetry config virtualenvs.in-project true
-        @ echo
-        poetry config --list
-        @ echo
-        poetry about
+
+
+        
+# # Add User dependencies via Poetry.
+# deps-add +USER_DEPS:
+#         @ echo "Adding the following user dependencies via Poetry: {{USER_DEPS}} ...\n"
+#         poetry add {{USER_DEPS}}
+#
+# # Add Developer dependencies via Poetry. (e.g. linters, testers)
+# deps-add-dev +DEV_DEPS:
+#         @ echo "Adding the following developer dependencies via Poetry: {{DEV_DEPS}} ...\n"
+#         poetry add --group=dev {{DEV_DEPS}}
+#
+# # Remove dependencies via Poetry.
+# deps-remove +DEPS:
+#         @ echo "Removing the following developer dependencies via Poetry: {{DEPS}} ...\n"
+#         poetry remove {{DEPS}}
+#
+
 
 # # WARN: doesn't work.  Spawns own shell.  So exit command never exits in the calling shell.
 # in_poet_shell := if env_var_or_default('POETRY_ACTIVE', 'false') == '1' { "true" } else { "false" }
