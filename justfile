@@ -64,15 +64,20 @@ push-chore: _notify_if_not_root
         git commit --message "chore(auto-gen): requirements files and dev_docs\n\n[note: this is a templated commit]" --no-verify
         git push
 
+# Runs pre-commit hook. (e.g. formatting, linting, testing, generating documentation, etc.)
+ghook: _notify_if_not_root
+        @ echo "Running git hook from {{local_root}}...\n"
+        poetry run git hook run pre-commit
+
 # Show dependency tree for project.
 dep-tree:
         @ echo "Dependency tree for {{local_root}}\n"
         poetry show --tree --verbose --verbose --verbose
 
 # Filtered dependency list results.
-dep-filter REGEX:
+dep-filter LITERAL:
         @ echo "Filtered, recursed dependency list for {{local_root}}\n"
-        poetry show --verbose --verbose --verbose | grep '{{REGEX}}'
+        poetry show --verbose --verbose --verbose | grep '{{LITERAL}}'
 
 # Warning: Heavy, Opinionated command. Installs Poetry and configs venvs to be local.  Downloads pipx for install, via Homebrew.
 [macos]
@@ -145,15 +150,6 @@ _show-list:
 ######################### Future Work / Explorations #########################
 #
 # Note: These are not all setup usefully yet and some may not be appropriate for a notebook repo.
-
-
-# TODO: consider running from a `.justscripts` directory 
-# See [here](https://just.systems/man/en/chapter_42.html?highlight=bash%20script#safer-bash-shebang-recipes)
-#
-# Runs pre-commit hook.
-_hook: _notify_if_not_root
-        @ echo "Running git hook from {{local_root}}...\n"
-        poetry run git hook run pre-commit
 
 # Setup Repo, Installing Dependencies and Readying venv.
 _setup:
