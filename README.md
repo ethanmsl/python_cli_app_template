@@ -44,11 +44,14 @@ To activate:
 
 ## Dev-Dependencies Specified
 
-- formatting: `isort` & `black`
-- linting: `pylint`
+- formatting: `ruff` (replacing `black` & `isort`, beta but acceptable for this functionality)
+- linting: `ruff`
+- security linting: `bandit`
 - lsp & typechecking: `pyright`
-- testing: `pytest` + `coverage` (via `pytest-cov`)
+- testing: `pytest` + `coverage` (via `pytest-cov`) + `hypothesis`
 - auto-documentation: `pdoc` (_not_ ~~"pdoc3"~~, which should be strongly avoided)
+
+(Note: because this repo is now a multi-purpose starter for various projects I've also included numerous data analysis dependencies (`polars`, `scipy`, `jupyter`, `holoviz`, etc.) under dev-dependencies so that they are not accidentally rolled into wheels by someone using the app templating functionality.)
 
 ## Run Pre-Commit Hook Manually
 
