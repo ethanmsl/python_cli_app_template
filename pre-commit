@@ -49,9 +49,11 @@ test_coverage_min=${{ carnate.test_coverage_min }}  # below this result the `cov
 echo -e "${DARK_GRAY}==============${YELLOW}Beginning of Pre-Commit Hook Script${DARK_GRAY}===============${NC}"
 
 # Run Ruff formatting against all code in the `src/` & `tests/` directories
+# (isort functionality is currently achived via auto-fixed linting on the `I`, isort, ruleset)
 echo -e "${DARK_GRAY}================================================================${NC}"
 echo -e "${YELLOW}running Ruff as formatter...${NC}"
 echo
+ruff check --select I --fix src/* tests/*
 ruff format src/* tests/*
 echo
 echo -e "${GREEN}Isort passed!${NC}"
