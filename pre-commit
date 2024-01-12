@@ -56,7 +56,7 @@ echo
 ruff check --select I --fix src/* tests/*
 ruff format src/* tests/*
 echo
-echo -e "${GREEN}Isort passed!${NC}"
+echo -e "${GREEN}Ruffly formatted & sorted ... or passed, either way: you're welcome!${NC}"
 echo -e "${DARK_GRAY}================================================================${NC}"
 
 # Run Ruff linting against all code in the `src/` & `tests/` directories
@@ -65,7 +65,7 @@ echo -e "${YELLOW}running Ruff as linter...${NC}"
 echo
 ruff check src/* tests/*
 echo
-echo -e "${GREEN}Pylint passed!${NC}"
+echo -e "${GREEN}Ruff linting passed!${NC}"
 echo -e "${DARK_GRAY}================================================================${NC}"
 
 # Run Pyright to check for errors against all code in the `src/` & `tests/` directories
@@ -109,11 +109,11 @@ echo -e "${DARK_GRAY}===========================================================
 # NOTE: this is a long check; should perhaps be delegated to remote and manual only
 # Run Bandit to check for security against all code in the `src/` directory
 echo -e "${DARK_GRAY}================================================================${NC}"
-echo -e "${YELLOW}running Pyright for Errors...${NC}"
+echo -e "${YELLOW}running Bandit for Errors...${NC}"
 echo
 bandit --configfile pyproject.toml --recursive .
 echo
-echo -e "${GREEN}Pyright Error-check passed!${NC}"
+echo -e "${GREEN}Bandit checks passed!${NC}"
 echo -e "${DARK_GRAY}================================================================${NC}"
 
 # (re)Generate requirements*.txt matching poetry.lock
