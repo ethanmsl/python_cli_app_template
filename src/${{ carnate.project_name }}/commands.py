@@ -5,6 +5,8 @@ to any other code and acting as the bridge to the user via
 the typer framework and decorators.
 """
 
+from __future__ import annotations
+
 import time
 from importlib import metadata
 from typing import Optional
@@ -14,7 +16,8 @@ from rich import print as rprint
 from rich.progress import Progress, SpinnerColumn, TextColumn, track
 from rich.prompt import Prompt
 
-from . import __name__ as APP_NAME
+from . import __name__
+
 # ^ uses parent's `__name__` to dynamically get the name of the app
 # note: this may be separate from the name used to call the app via cli
 # (e.g. `ripgrep` is an app, but it is called with `rg`)
@@ -29,10 +32,11 @@ app = typer.Typer(rich_markup_mode="rich", add_completion=False)
 # get version from pyproject.toml
 __version__ = metadata.version(__package__)
 
-def version_callback(version: bool):
+
+def version_callback(version: bool) -> None:
     """Print app version and exit."""
     if version:
-        rprint(f"{APP_NAME} ('${{ carnate.cli_app_name }}') Version: {__version__}")
+        rprint(f"{__name__} ('${{ carnate.cli_app_name }}') Version: {__version__}")
         raise typer.Exit(code=0)
 
 
@@ -45,7 +49,7 @@ def app_options(
         callback=version_callback,
         is_eager=True,
     ),
-):
+) -> None:
     """Make a callback to get version.
 
     **Base App** calls Callback.
@@ -116,7 +120,7 @@ def adding_tags() -> None:
 
 
 @app.command(rich_help_panel="Visual")
-def spin(seconds: int = typer.Argument(5, min=1, max=36)) -> None:
+def spin(seconds: int = typer.Argument(5, min=0, max=36)) -> None:
     """Generate Spinners.
 
     For the unknowably long and asynchronous.
@@ -135,7 +139,7 @@ def spin(seconds: int = typer.Argument(5, min=1, max=36)) -> None:
 
 @app.command(rich_help_panel="Visual")
 def progbar(
-    seconds: int = typer.Argument(5, min=1, max=16),
+    seconds: int = typer.Argument(5, min=0, max=16),
     plain_bar: bool = False,
 ) -> None:
     """Generate progress bar in terminal."""
@@ -161,8 +165,8 @@ def progbar(
 
 @app.command(rich_help_panel="Additional Validations")
 def numeric_intake(
-    x_int: int = typer.Argument(..., min=0, max=2),
-    y_int: int = typer.Argument(..., min=-1, max=1),
+    x_int: int = typer.Argument(..., min=0, max=20),
+    y_int: int = typer.Argument(..., min=-10, max=10),
 ) -> int:
     """Take in `min` and `max`, with restrictions."""
     rprint(f"[blue]X[/blue]: {x_int}, [green]Y[/green]: {y_int}")
