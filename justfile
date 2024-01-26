@@ -26,6 +26,7 @@ init:
         poetry install
         poetry build
         cp data/template.env .env
+        cp .git/hooks/pre-commit .justscripts/pre-commit
 
 # Open notebook environment, Jupyter Lab, in a web browser.
 open: _notify_if_not_root
@@ -46,14 +47,15 @@ poet: _notify_if_not_root
         @ echo "{{GRN}}poetry {{CYN}}install{{NC}}: installs all dependencies."
         @ echo "{{GRN}}poetry {{CYN}}build{{NC}}: builds tarball and wheel, for distribution."
 
-# Push Jupyter file changes after jupytext syncing.
-push-nb: _jtxt
-        @echo "Auto-Gen File Updates: Committing and Pushing all changes to requirments*.txt & dev_docs/*: {{local_root}}...\n"
-        git fetch
-        git restore --staged .
-        git add notebooks/*
-        git commit --message "chore(jupyter): Automated Jupyter updates push.\n\n[note: this is a templated commit]" --no-verify
-        git push
+# Sync all files in `notebooks/` with Jupytext.  (Create code-only mirrors of Jupyter files.)
+jups: _notify_if_not_root
+        #!/bin/bash
+        @ echo "Syncing Jupytext versions of all '.ipynb' notebooks...\n"
+        set -xeuo pipefail # euo pipefail: fail flags; x: print commands
+        for notebook in notebooks/*.ipynb; do
+                poetry run jupytext --set-formats .ipynb,.ju.py:percent "$notebook" # jupytext  % format
+                poetry run jupytext --sync "$notebook" # synch .ju.py & .ipynb files
+        done
 
 # Auto-Gen Files: Add, Commit, and Push all changes.
 push-chore: _notify_if_not_root
@@ -103,16 +105,6 @@ notify_text := "\n-----\nNOTE:\n    You are running this command in:\n"+invocd_f
 _notify_if_not_root:
         @ echo '{{ if invoc_is_root == 'true' { "" } else { notify_text } }}'
 
-# Sync all files in `notebooks/` with Jupytext.
-_jtxt: _notify_if_not_root
-        #!/bin/bash
-        @ echo "Syncing Jupytext versions of all '.ipynb' notebooks...\n"
-        set -xeuo pipefail # euo pipefail: fail flags; x: print commands
-        for notebook in notebooks/*.ipynb; do
-                poetry run jupytext --set-formats .ipynb,.ju.py:percent "$notebook" # jupytext  % format
-                poetry run jupytext --sync "$notebook" # synch .ju.py & .ipynb files
-        done
-
 # Scan for security concerns.
 _sec-test:
         poetry run bandit -r notebooks/
@@ -122,6 +114,15 @@ _jsync +NOTEBOOK: _notify_if_not_root
         @ echo "Creating/Syncing Jupytext versions of the following '.ipynb' notebooks {{NOTEBOOK}}...\n"
         poetry run jupytext --set-formats .ipynb,.ju.py:percent notebooks/{{NOTEBOOK}}.ipynb # jupytext  % format
         poetry run jupytext --sync notebooks/{{NOTEBOOK}}.ipynb # synch .ju.py & .ipynb files
+
+# Push Jupyter file changes after jupytext syncing.
+_push-nb: jups
+        @echo "Auto-Gen File Updates: Committing and Pushing all changes to requirments*.txt & dev_docs/*: {{local_root}}...\n"
+        git fetch
+        git restore --staged .
+        git add notebooks/*
+        git commit --message "chore(jupyter): Automated Jupyter updates push.\n\n[note: this is a templated commit]" --no-verify
+        git push
 
 # Update Poetry Dependencies.
 _update:
