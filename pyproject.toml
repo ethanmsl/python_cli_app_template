@@ -114,6 +114,7 @@ select = ["ALL"]
 ignore = [
         "D203",   # One blank line before class -- conflicts with "D211"
         "D213",   # Multiline docstrings start on second line -- conflicts with "D212"
+        "E501",   # Line too long; redundant with auto-formatting where wanted (not wanted in long printlines, for example)
         "COM812", # Requests trailing commas -- can conflict with auto-formatting
         "ISC001", # Concatination of single line strings -- can conflict with auto-formatting.
 ]
