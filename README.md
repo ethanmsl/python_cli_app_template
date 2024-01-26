@@ -1,5 +1,18 @@
 # ${{ carnate.project_name }}
 
+<!--toc:start-->
+
+- [${{ carnate.project_name }}](#carnate-projectname)
+  - [This project uses the [Just](https://just.systems/), make-like, command runner.](#this-project-uses-the-justhttpsjustsystems-make-like-command-runner)
+  - [This project uses [Poetry](https://python-poetry.org/)](#this-project-uses-poetryhttpspython-poetryorg)
+  - [This project uses [Jupyter](https://jupyter.org/)](#this-project-uses-jupyterhttpsjupyterorg)
+  - [CircleCI Test Status Badge](#circleci-test-status-badge)
+  - [Auto-Documentation Link](#auto-documentation-link)
+  - [Dev-Dependencies Specified](#dev-dependencies-specified)
+  - [Run Pre-Commit Hook Manually](#run-pre-commit-hook-manually)
+  - [Dev Notes, Misc.](#dev-notes-misc)
+  <!--toc:end-->
+
 ## This project uses the [Just](https://just.systems/), make-like, command runner.
 
 You can find a list of [installation methods for various systems here](https://github.com/casey/just#packages).
@@ -60,4 +73,24 @@ from anywhere in project:
 ```zsh
 poetry shell
 git hook run pre-commit
+```
+
+## Dev Notes, Misc.
+
+Bandit exception syntax:
+
+```python
+token_request_prefix = "Token token="  # nosec CWE-259
+```
+
+Ruff exception syntax:
+
+```python
+token_request_prefix = "Token token="  # noqa: S105
+```
+
+Bandit + Ruff exception on same line:
+
+```python
+token_request_prefix = "Token token="  # nosec CWE-259  # noqa: S105
 ```
