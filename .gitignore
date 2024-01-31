@@ -1,6 +1,10 @@
 # standard GitHub GitIgnore for Python (as of XI-15-2022)
 # https://github.com/github/gitignore/blob/main/Python.gitignore
 
+# place to store data thaat won't get accidentally uploaded to a remote
+data/no_sync/*
+!.gitkeep
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
