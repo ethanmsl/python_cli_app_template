@@ -502,4 +502,45 @@ print(df2)
 df2new = df2.select(pl.struct(pl.all()).alias("my_struct"))
 print(df2new)
 
+# %% [markdown]
+# ## Taxi
+
 # %%
+# Jan 2023 NYC Taxi Data (Yellowcab)
+pl.read_parquet("../data/yellow_tripdata_2023-01.parquet").sample(3)
+
+# %%
+# NYC Taxi Zone Data
+pl.read_csv("../data/taxi+_zone_lookup.csv").sample(3)
+
+
+# %%
+# Planned Join and Aggregation Query
+taxi_plan = (
+    pl.scan_parquet("../data/yellow_tripdata_2023-01.parquet")
+    .join(
+        pl.scan_csv("../data/taxi+_zone_lookup.csv"),
+        left_on="PULocationID",
+        right_on="LocationID",
+    )
+    .filter(pl.col("total_amount") > 25)
+    .group_by("Zone")
+    .agg(
+        (
+            pl.col("total_amount")
+            / (
+                pl.col("tpep_dropoff_datetime") - pl.col("tpep_pickup_datetime")
+            ).dt.total_minutes()
+        )
+        .mean()
+        .alias("cost_per_minute")
+    )
+    .sort("cost_per_minute", descending=True)
+)
+
+# Display query plan
+taxi_plan.show_graph()
+
+# %%
+taxi_df = taxi_plan.collect()
+print(taxi_df)
