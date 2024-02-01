@@ -18,7 +18,7 @@ _default:
         @ just --list --unsorted
 
 # initialize project
-init:
+init: && jups
         which just  # in case you're reading ;)
         which pipx
         which poetry
