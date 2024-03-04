@@ -5,6 +5,11 @@
 data/no_sync/*
 !.gitkeep
 
+# don't store any `.ipynb` files or checkpoints, only `.ju.py` files -- this prevents accidental storage of sensitive data
+# the second is coverd by the first, but being explicit for clarity
+notebooks/*.ipynb
+notebooks/.ipynb_checkpoints/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
