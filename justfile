@@ -22,6 +22,7 @@ init: && jups
         which just  # in case you're reading ;)
         which pipx
         which poetry
+        which
         poetry check
         poetry install
         poetry build
@@ -80,11 +81,11 @@ dep-filter LITERAL:
         @ echo "Filtered, recursed dependency list for {{local_root}}\n"
         poetry show --verbose --verbose --verbose | grep '{{LITERAL}}'
 
-# Warning: Heavy, Opinionated command. Installs Poetry and configs venvs to be local.  Downloads pipx for install, via Homebrew.
+# Warning: Heavy, Opinionated command. Installs PipX, Poetry, and configs venvs to be local.  Downloads pipx for install, via Homebrew.
 [macos]
 [confirm]
-get-poetry: && init
-        @ echo "\n-----\nInstalling and Configuring Poetry. Utilizing Homebrew and PipX\n-----\n"
+get-poetry:
+        @ echo "\n-----\nInstalling and Configuring PipX & Poetry. Utilizing Homebrew and PipX\n-----\n"
         brew install pipx
         @ echo
         pipx ensurepath
@@ -97,6 +98,14 @@ get-poetry: && init
         @ echo
         poetry about
 
+# Warning: Heavy, Opinionated command. Installs Graphviz package via Homebrew. (The python package is merely an interface to this.)
+[macos]
+[confirm]
+get-graphviz:
+        @ echo "\n-----\nInstalling Graphviz. Utilizing Homebrew.\n-----\n"
+        brew install graphviz
+        @ echo
+        brew info graphviz
 
 ######################### Clutter Help Docs #########################
 
